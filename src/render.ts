@@ -2,7 +2,7 @@ import { FIELDS, PARTICLE_COUNT, ParticleBuffer, ColorBuffer, WIDTH, HEIGHT } fr
 // this represents the color each pixel based on particle positions within ParticleBuffer
 
 
-const canvas : HTMLCanvasElement = document.getElementById("particles")! as HTMLCanvasElement;
+const canvas : HTMLCanvasElement = document.getElementById("particle")! as HTMLCanvasElement;
 const context : CanvasRenderingContext2D = canvas.getContext('2d')!;
 
 /**

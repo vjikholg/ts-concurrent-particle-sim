@@ -7,7 +7,7 @@ let last_time = 1;
  * dt = delta time, calculate to handle variable frame rate. 
  * @param curr_time 
  */
-function runSimulation(curr_time: number) : void { 
+export function runSimulation(curr_time: number) : void { 
     const dt : number = Math.min(1, (curr_time - last_time)/1000); 
     last_time = curr_time;
     for (let i = 0 ; i < CPU_CORES; i++) {
@@ -15,5 +15,4 @@ function runSimulation(curr_time: number) : void {
     }
     RenderField(); 
     requestAnimationFrame(runSimulation);
-    
 }   

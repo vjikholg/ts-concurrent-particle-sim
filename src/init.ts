@@ -1,6 +1,6 @@
-import { CHUNKSIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, sharedViewSignals, WORKER_POOL } from "./structs/global";
+import { CHUNKSIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, rawSharedViewSignals, WORKER_POOL } from "./structs/global";
 
-const canvas : HTMLElement = (document.getElementById("canvas")!);
+const canvas : HTMLElement = (document.getElementById("particle")!);
 const WIDTH : number = window.innerWidth; 
 const HEIGHT : number = window.innerHeight;
 let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight)
@@ -24,13 +24,13 @@ export function InitializeParticleField(buffer: Float32Array) : void {
     }
 }
 
-export function InitializeWorkers() : void { 
+export function InitializeWorkers(pool : Worker[]) : void { 
     for (let i = 0; i < CPU_CORES; i++) {
         const worker = new Worker("../worker.js");
-        WORKER_POOL.push(worker);
+        pool.push(worker);
         worker.postMessage({
-            rawParticleBuffer : SharedArrayBuffer,
-            rawSharedViewSignals : SharedArrayBuffer,
+            rawParticleBuffer,
+            rawSharedViewSignals,
             id: i, 
             chunkSize: CHUNKSIZE, 
             chunkOffset: CHUNKSIZE * i, 

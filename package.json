@@ -4,8 +4,11 @@
     "three": "^0.182.0",
     "typescript": "^5.9.3"
   },
-  "type": "module", 
+  "type": "module",
   "script": {
     "dev": "npx tsx index.ts"
-  } 
+  },
+  "devDependencies": {
+    "vite-plugin-cross-origin-isolation": "^0.1.6"
+  }
 }
