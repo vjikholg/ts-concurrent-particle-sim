@@ -1,6 +1,9 @@
-import { SIGNAL_RUN, SIGNAL_PAUSE, SIGNAL_READY, rawParticleBuffer } from "./structs/global";
-import { ParticleBuffer, sharedViewSignals, chunkSize } from "./structs/global";
+
 console.log("worker created");
+
+const SIGNAL_RUN : number = 0;
+const SIGNAL_PAUSE : number = 1;
+const SIGNAL_READY : number = 2;
 
 onmessage = (event) => {
     const {
@@ -10,7 +13,8 @@ onmessage = (event) => {
         chunkSize, 
         chunkOffset, 
         FIELDS, 
-        rawSharedViewSimData 
+        rawSharedViewSimData,
+        rawGravityBuffer
     } = event.data
 
     const particleView : Float32Array = new Float32Array(rawParticleBuffer)!;
@@ -24,6 +28,8 @@ onmessage = (event) => {
         if (signalView[id] !== SIGNAL_RUN) return;
         const delta : number = dt();
 
+        if (rawGravityBuffer)
+            
         for (let i = chunkOffset; i < chunkOffset+chunkSize; i++) { 
             particleView[i*FIELDS]! += particleView[i*FIELDS + 3]! * delta;
             particleView[i*FIELDS + 1]! += particleView[i*FIELDS + 4]! * delta;

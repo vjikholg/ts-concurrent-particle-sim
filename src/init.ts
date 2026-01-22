@@ -1,6 +1,6 @@
 import { chunkSize, CPU_CORES, FIELDS, PARTICLE_COUNT, ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, rawSharedViewSignals, WORKER_POOL } from "./structs/global";
 
-const canvas : HTMLElement = (document.getElementById("particle")!);
+const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
 const WIDTH : number = window.innerWidth; 
 const HEIGHT : number = window.innerHeight;
 let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight)
@@ -18,15 +18,15 @@ export function InitializeParticleField(buffer: Float32Array) : void {
         buffer[i*FIELDS]   = Math.random() * HEIGHT // x 
         buffer[i*FIELDS+1] = Math.random() * WIDTH  // y
         buffer[i*FIELDS+2] = 0// z
-        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 10 // dx
-        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 10 // dy
+        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 40 // dx
+        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 40 // dy
         buffer[i*FIELDS+5] = 0 // dz unused for now but added just to see perf. 
     }
 }
 
 export function InitializeWorkers(pool : Worker[]) : void { 
     for (let i = 0; i < CPU_CORES; i++) {
-        const worker = new Worker(new URL("../worker.js", import.meta.url));
+        const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: 'module' });
         pool.push(worker);
         worker.postMessage({
             rawParticleBuffer,
@@ -38,4 +38,19 @@ export function InitializeWorkers(pool : Worker[]) : void {
             rawSharedViewSimData
         })
     }
+}
+
+export function AddResizeListener(window: Window) : void {
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight;
+        colorbuffer = new ImageData(canvas.width, canvas.height);
+    })
+}
+
+export function AddMouseListener(window: Window, fn?: Function) {
+    window.addEventListener('click', (e: PointerEvent) => {
+        console.log(`event fired: with params ${e.clientX}, ${e.clientY}`)
+        fn ? fn(e.clientX, e.clientY) : null;
+    })
 }
