@@ -1,5 +1,5 @@
 import { RenderField } from "./render";
-import { CPU_CORES, sharedViewSignals, SIGNAL_RUN } from "./structs/global";
+import { CPU_CORES, sharedViewSignals, sharedViewSimdata, SIGNAL_RUN } from "./structs/global";
 
 let last_time = 1;
 
@@ -10,6 +10,7 @@ let last_time = 1;
 export function runSimulation(curr_time: number) : void { 
     const dt : number = Math.min(1, (curr_time - last_time)/1000); 
     last_time = curr_time;
+    sharedViewSimdata[0] = dt;
     for (let i = 0 ; i < CPU_CORES; i++) {
         sharedViewSignals[i] = SIGNAL_RUN
     }

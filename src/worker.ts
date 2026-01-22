@@ -1,5 +1,5 @@
 import { SIGNAL_RUN, SIGNAL_PAUSE, SIGNAL_READY, rawParticleBuffer } from "./structs/global";
-import { ParticleBuffer, sharedViewSignals, CHUNKSIZE } from "./structs/global";
+import { ParticleBuffer, sharedViewSignals, chunkSize } from "./structs/global";
 console.log("worker created");
 
 onmessage = (event) => {

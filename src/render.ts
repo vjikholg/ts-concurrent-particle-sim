@@ -16,7 +16,7 @@ export function RenderField() {
         if (x > WIDTH || x < 0) continue;
         const y : number = ParticleBuffer[i * FIELDS + 1]!; 
         if (y > HEIGHT || y < 0) continue;
-        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * FIELDS; 
+        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * 4; 
         
         // handle z-case here, in general should be fine. 
 

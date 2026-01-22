@@ -2,8 +2,8 @@ import { InitializeParticleField, InitializeWorkers } from "./init"
 import { runSimulation } from "./sim";
 import * as global from "./structs/global"
 
-InitializeWorkers(global.WORKER_POOL)
 InitializeParticleField(global.ParticleBuffer);
+InitializeWorkers(global.WORKER_POOL)
 
 const handle = setInterval(() => {
     console.log("waiting for workers..." , global.sharedViewSignals);
@@ -12,4 +12,4 @@ const handle = setInterval(() => {
     }
     clearInterval(handle)
     requestAnimationFrame(runSimulation);
-}, 100); 
+}, 100);
