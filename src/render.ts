@@ -20,10 +20,10 @@ export function RenderField() {
         
         // handle z-case here, in general should be fine. 
 
-        ColorBuffer.data[pixel_idx]! += 30;     // red 
-        ColorBuffer.data[pixel_idx + 1]! += 30; // green
-        ColorBuffer.data[pixel_idx + 2]! += 30; // blue
-        ColorBuffer.data[pixel_idx + 3]! += 30; // alpha 
+        ColorBuffer.data[pixel_idx]! += colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!);     // red 
+        ColorBuffer.data[pixel_idx + 1]! += 80; // green
+        ColorBuffer.data[pixel_idx + 2]! += 80; // blue
+        ColorBuffer.data[pixel_idx + 3]! += 255; // alpha 
     }
     context.putImageData(ColorBuffer, 0, 0);
 }
@@ -34,8 +34,9 @@ export function RenderField() {
  * @param dy 
  * @param dz 
  */
-function colorFromVelocity(dx: number, dy: number, dz: number) { 
-    
+function colorFromVelocity(dx: number, dy: number, dz?: number) : number { 
+    const velocity : number = Math.sqrt(dx * dx + dy * dy);
+    const normalized : number = Math.min(1, velocity/1000); 
+    const color : number = normalized * 255; 
+    return color;
 }
-
-
