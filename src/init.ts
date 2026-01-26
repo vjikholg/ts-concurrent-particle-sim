@@ -1,6 +1,7 @@
 import { chunkSize, CPU_CORES, FIELDS, PARTICLE_COUNT, 
     ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, 
-    rawSharedViewSignals, WORKER_POOL, rawGravityBuffer, GravityBuffer } from "./structs/global";
+    rawSharedViewSignals, WORKER_POOL, rawGravityBuffer, GravityBuffer,
+    rawPixelBuffer } from "./structs/global";
 
 const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
 const WIDTH : number = window.innerWidth; 
@@ -20,8 +21,8 @@ export function InitializeParticleField(buffer: Float32Array) : void {
         buffer[i*FIELDS]   = Math.random() * WIDTH // x 
         buffer[i*FIELDS+1] = Math.random() * HEIGHT  // y
         buffer[i*FIELDS+2] = 0// z
-        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 0 // dx
-        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 0 // dy
+        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 10 // dx
+        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 10 // dy
         buffer[i*FIELDS+5] = 0 // dz unused for now but added just to see perf. 
         buffer[i*FIELDS+6] = (Math.random()*999 + 1)
     }
@@ -34,12 +35,13 @@ export function InitializeWorkers(pool : Worker[]) : void {
         worker.postMessage({
             rawParticleBuffer,
             rawSharedViewSignals,
+            rawSharedViewSimData,
             id: i, 
             chunkSize, 
             chunkOffset: chunkSize * i, 
             FIELDS, 
-            rawSharedViewSimData,
-            rawGravityBuffer
+            rawGravityBuffer,
+            rawPixelBuffer
         })
     }
 }
@@ -47,11 +49,11 @@ export function InitializeWorkers(pool : Worker[]) : void {
 export function InitializeTestGravity() : void {
     GravityBuffer[0] = WIDTH/2 - 200; 
     GravityBuffer[1] = HEIGHT/2; 
-    GravityBuffer[2] = 1000;
+    GravityBuffer[6] = 1000;
     console.log(GravityBuffer);
-    GravityBuffer[3] = WIDTH/2 + 200; 
-    GravityBuffer[4] = HEIGHT/2; 
-    GravityBuffer[5] = 1000;
+    GravityBuffer[7] = WIDTH/2 + 200; 
+    GravityBuffer[8] = HEIGHT/2; 
+    GravityBuffer[13] = 1000;
 }
 
 export function AddResizeListener(window: Window) : void {

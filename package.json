@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "coi-serviceworker": "^0.1.7",
     "dat-gui": "^0.5.0",
     "lil-gui": "^0.20.0",
     "three": "^0.182.0",
