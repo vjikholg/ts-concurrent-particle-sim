@@ -16,7 +16,7 @@ gui.add(perfStats, "renderMs", 0, 50, 0.1).name("Render ms").listen();
 
 InitializeTestGravity()
 InitializeParticleField(global.ParticleBuffer);
-InitializeWorkers(global.WORKER_POOL)
+InitializeWorkers(global.WORKER_POOL, global.WORKER_COUNT)
 AddResizeListener(window); 
 AddMouseListener(window);
 

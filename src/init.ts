@@ -1,12 +1,26 @@
-import { chunkSize, CPU_CORES, FIELDS, PARTICLE_COUNT, 
+import { runSimulation } from "./sim";
+import { WORKER_CHUNK_SIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, 
     ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, 
     rawSharedViewSignals, WORKER_POOL, rawGravityBuffer, GravityBuffer,
-    rawPixelBuffer } from "./structs/global";
+    rawPixelBufferA, rawPixelBufferB, PixelBufferA, PixelBufferB, rawPixelBufferActive, 
+    WORKER_COUNT} from "./structs/global";
 
+// hardware info
 const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
 const WIDTH : number = window.innerWidth; 
 const HEIGHT : number = window.innerHeight;
-let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight)
+
+// shared info between init, sim, and render.
+let ACTIVE_WORKERS : number = 0; // needed in sim.ts
+
+/**
+ * Resets number of workers that are still working to WORKER_COUNT
+ */
+export function ResetWorker() {
+    ACTIVE_WORKERS = WORKER_COUNT;
+}
+
+let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight);
 
 /**
  * buffer[0] - buffer[6] contain info in following order: (x,y,z,dx,dy,dz)
@@ -28,22 +42,37 @@ export function InitializeParticleField(buffer: Float32Array) : void {
     }
 }
 
-export function InitializeWorkers(pool : Worker[]) : void { 
-    for (let i = 0; i < CPU_CORES; i++) {
+/**
+ * populates a given pool of workers based on given parameters 
+ * @param pool  pool it's populating
+ * @param count number of workers to init
+ */
+export function InitializeWorkers(pool : Worker[], count: number) : void { 
+    ACTIVE_WORKERS = count;
+    for (let i = 0; i < count; i++) {
         const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: 'module' });
+        worker.addEventListener('message', onWorkerMessage)
         pool.push(worker);
         worker.postMessage({
-            rawParticleBuffer,
-            rawSharedViewSignals,
-            rawSharedViewSimData,
-            id: i, 
-            chunkSize, 
-            chunkOffset: chunkSize * i, 
-            FIELDS, 
-            rawGravityBuffer,
-            rawPixelBuffer
-        })
+            id: i,                                                                   // worker ID
+            rawParticleBuffer,                                                       // particle info
+            rawSharedViewSimData,                                                    // dt, width, height, mouse (x,y), relevent sim information
+            rawGravityBuffer,                                                        // (x,y,z,mass) for gravitational sources
+            particleWorkingPositionStart: WORKER_CHUNK_SIZE,                         // size of chunk assigned to worker, section of SharedArrayBuffer its working in
+            particleWorkingPositionEnd: WORKER_CHUNK_SIZE*i + WORKER_CHUNK_SIZE,     // starting pos'n of the SAB its working in
+            FIELDS,                                                                  // # of fields/particle which it occupies, aka "strides";
+        });
     }
+}
+
+/**
+ * worker message helper, ensure all workers complete before running animation frame. 
+ * @returns 
+ */
+function onWorkerMessage() : void {
+    ACTIVE_WORKERS--;
+    if (ACTIVE_WORKERS !== 0) return; 
+    requestAnimationFrame(runSimulation); 
 }
 
 export function InitializeTestGravity() : void {

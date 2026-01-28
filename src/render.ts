@@ -1,4 +1,4 @@
-import { FIELDS, PARTICLE_COUNT, ParticleBuffer, PixelBuffer, ColorBuffer, WIDTH, HEIGHT, CPU_CORES, PIXEL_FIELDS } from "./structs/global";
+import { FIELDS, PARTICLE_COUNT, ParticleBuffer, ColorBuffer, WIDTH, HEIGHT, CPU_CORES, PIXEL_FIELDS } from "./structs/global";
 // this represents the color each pixel based on particle positions within ParticleBuffer
 
 
@@ -16,7 +16,7 @@ export function RenderField() {
         if (x > WIDTH || x < 0) continue;
         const y : number = ParticleBuffer[i * FIELDS + 1]!; 
         if (y > HEIGHT || y < 0) continue;
-        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * 4; 
+        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * 4; // bytelength for Colorbuffer.data
         
         // handle z-case here, in general should be fine. 
         // colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!)
@@ -31,16 +31,16 @@ export function RenderField() {
 /**
  * Renders the field. Doesn't handle any of the rendering calculations itself, just reads. 
  */
-export function RenderFieldBuffer(buffer : Int8Array) {
+export function RenderFieldBuffer(buffer : Uint8ClampedArray) {
     const pixels : ImageDataArray = ColorBuffer.data; 
     const pxInfoNo : number = WIDTH * HEIGHT * 4; // # of px on screen * # |rgba|
     let r = 0; let g = 0;let b = 0; let a = 0; 
     for (let i = 0; i < WIDTH * HEIGHT; i++) {
         for (let j = 0; j < CPU_CORES; j++) {
-            r! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS]!;
-            g! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 1]!;
-            b! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 2]!;
-            a! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 3]!;
+            r! += buffer[j * pxInfoNo + i * PIXEL_FIELDS]!;
+            g! += buffer[j * pxInfoNo + i * PIXEL_FIELDS + 1]!;
+            b! += buffer[j * pxInfoNo + i * PIXEL_FIELDS + 2]!;
+            a! += buffer[j * pxInfoNo + i * PIXEL_FIELDS + 3]!;
         }
         pixels[i*PIXEL_FIELDS] = r; 
         pixels[i*PIXEL_FIELDS + 1] = g; 
