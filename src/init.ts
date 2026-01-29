@@ -1,8 +1,7 @@
 import { runSimulation } from "./sim";
-import { WORKER_CHUNK_SIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, 
-    ParticleBuffer, rawParticleBuffer, rawSharedViewSimData, 
-    rawSharedViewSignals, WORKER_POOL, rawGravityBuffer, GravityBuffer,
-    rawPixelBufferA, rawPixelBufferB, PixelBufferA, PixelBufferB, rawPixelBufferActive, 
+import { WORKER_CHUNK_SIZE, FIELDS, PARTICLE_COUNT, 
+    rawParticleBuffer, rawSharedViewSimData, 
+    WORKER_POOL, rawGravityBuffer, GravityBuffer,
     WORKER_COUNT} from "./structs/global";
 
 // hardware info
@@ -12,6 +11,7 @@ const HEIGHT : number = window.innerHeight;
 
 // shared info between init, sim, and render.
 let ACTIVE_WORKERS : number = 0; // needed in sim.ts
+let READY_WORKERS : number = 0;
 
 /**
  * Resets number of workers that are still working to WORKER_COUNT
@@ -49,16 +49,18 @@ export function InitializeParticleField(buffer: Float32Array) : void {
  */
 export function InitializeWorkers(pool : Worker[], count: number) : void { 
     ACTIVE_WORKERS = count;
+    READY_WORKERS = 0;
     for (let i = 0; i < count; i++) {
         const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: 'module' });
-        worker.addEventListener('message', onWorkerMessage)
+        worker.addEventListener('message', onWorkerMessage);
         pool.push(worker);
         worker.postMessage({
+            type: 0,
             id: i,                                                                   // worker ID
             rawParticleBuffer,                                                       // particle info
             rawSharedViewSimData,                                                    // dt, width, height, mouse (x,y), relevent sim information
             rawGravityBuffer,                                                        // (x,y,z,mass) for gravitational sources
-            particleWorkingPositionStart: WORKER_CHUNK_SIZE,                         // size of chunk assigned to worker, section of SharedArrayBuffer its working in
+            particleWorkingPositionStart: WORKER_CHUNK_SIZE*i,                       // size of chunk assigned to worker, section of SharedArrayBuffer its working in
             particleWorkingPositionEnd: WORKER_CHUNK_SIZE*i + WORKER_CHUNK_SIZE,     // starting pos'n of the SAB its working in
             FIELDS,                                                                  // # of fields/particle which it occupies, aka "strides";
         });
@@ -69,17 +71,28 @@ export function InitializeWorkers(pool : Worker[], count: number) : void {
  * worker message helper, ensure all workers complete before running animation frame. 
  * @returns 
  */
-function onWorkerMessage() : void {
-    ACTIVE_WORKERS--;
-    if (ACTIVE_WORKERS !== 0) return; 
-    requestAnimationFrame(runSimulation); 
+function onWorkerMessage(event: MessageEvent) : void {
+    if (event.data?.type === 1) {
+        READY_WORKERS++;
+        if (READY_WORKERS === WORKER_COUNT) {
+            requestAnimationFrame(runSimulation);
+        }
+        return;
+    }
+
+    if (event.data?.type === 3) {
+        if (ACTIVE_WORKERS < 0) throw new RangeError(`$INVALID ACTIVEWORKERS: ${ACTIVE_WORKERS}`); 
+        ACTIVE_WORKERS--;
+        if (ACTIVE_WORKERS !== 0) return; 
+        requestAnimationFrame(runSimulation); 
+    }
 }
 
 export function InitializeTestGravity() : void {
     GravityBuffer[0] = WIDTH/2 - 200; 
     GravityBuffer[1] = HEIGHT/2; 
     GravityBuffer[6] = 1000;
-    console.log(GravityBuffer);
+    // console.log(GravityBuffer);
     GravityBuffer[7] = WIDTH/2 + 200; 
     GravityBuffer[8] = HEIGHT/2; 
     GravityBuffer[13] = 1000;

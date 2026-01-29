@@ -1,9 +1,9 @@
 /**
  * Simulation + Rendering controller. Runs on main thread.
  */
-import { RenderField, RenderFieldBuffer } from "./render"; // render command
-import { CPU_CORES, ReassignBuffer, sharedViewSimdata, SIGNAL_RUN } from "./structs/global"; // hardware/signalling info
-import { rawPixelBufferA, rawPixelBufferB, rawPixelBufferActive } from "./structs/global"; // double buffering
+import { RenderFieldBuffer } from "./render"; // render command
+import { sharedViewSimdata } from "./structs/global"; // hardware/signalling info
+import { rawPixelBufferA, rawPixelBufferB } from "./structs/global"; // double buffering
 import { WORKER_POOL } from "./structs/global"; // worker pool 
 import { ResetWorker } from "./init";
 
@@ -15,6 +15,8 @@ export const perfStats = {
 let last_time : number = 0;
 let emaFrameMs : number = 16.7; 
 const FPS_EMA_ALPHA : number  = 0.1;
+let readBuffer : SharedArrayBuffer = rawPixelBufferA;
+let writeBuffer : SharedArrayBuffer = rawPixelBufferB;
 
 /**
  * runs dt-ticks of the simulations.
@@ -32,19 +34,29 @@ export function runSimulation(curr_time: number) : void {
     perfStats.fps = 1000 / emaFrameMs; 
     // end perf stuff setup
 
+    const prevRead = readBuffer;
+    readBuffer = writeBuffer;
+    writeBuffer = prevRead;
+
     sharedViewSimdata[0] = dt;
     ResetWorker();
     // profiling starts
     const renderStart : number = performance.now();
     
-    WORKER_POOL.forEach((worker: Worker, i: number) => {
+    // post pixel buffer to render into for workers
+    WORKER_POOL.forEach((worker: Worker) => {
         worker.postMessage({
-            rawPixelBufferActive
-        })
-    })
+            type: 2,
+            rawPixelBufferActive: writeBuffer,
+        });
+    });
     
-    ReassignBuffer()
-    RenderFieldBuffer(new Uint8ClampedArray(rawPixelBufferActive))
+    // 1st iteration - reassign to an empty buffer
+    // nth - reassign to n-1th buffer iteration  
+    // ReassignBuffer()
+
+    // render n-1 buffer 
+    RenderFieldBuffer(new Uint8ClampedArray(readBuffer))
     perfStats.renderMs = performance.now() - renderStart;
     // profiling ends. 
 }  

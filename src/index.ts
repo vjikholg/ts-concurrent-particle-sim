@@ -17,14 +17,14 @@ gui.add(perfStats, "renderMs", 0, 50, 0.1).name("Render ms").listen();
 InitializeTestGravity()
 InitializeParticleField(global.ParticleBuffer);
 InitializeWorkers(global.WORKER_POOL, global.WORKER_COUNT)
-AddResizeListener(window); 
-AddMouseListener(window);
+// AddResizeListener(window); 
+// AddMouseListener(window);
 
-const handle = setInterval(() => {
-    console.log("waiting for workers..." , global.sharedViewSignals);
-    if (global.sharedViewSignals[global.sharedViewSignals.length - 1] !== global.SIGNAL_READY){
-        return;
-    }
-    clearInterval(handle)
-    requestAnimationFrame(runSimulation);
-}, 100);
+// const handle = setInterval(() => {
+//     // console.log("waiting for workers..." , global.sharedViewSignals);
+//     // if (global.sharedViewSignals[global.sharedViewSignals.length - 1] !== global.SIGNAL_READY){
+//     //     return;
+//     // }
+//     clearInterval(handle)
+//     requestAnimationFrame(runSimulation);
+// }, 100);

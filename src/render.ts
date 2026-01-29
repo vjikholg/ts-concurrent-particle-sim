@@ -20,7 +20,7 @@ export function RenderField() {
         
         // handle z-case here, in general should be fine. 
         // colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!)
-        ColorBuffer.data[pixel_idx]! += 80 + colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!);     // red 
+        ColorBuffer.data[pixel_idx]! += 80 + colorFromVelocity(ParticleBuffer[i * FIELDS + 3]!, ParticleBuffer[i * FIELDS + 4]!);     // red 
         ColorBuffer.data[pixel_idx + 1]! += 80; // green
         ColorBuffer.data[pixel_idx + 2]! += 80; // blue
         ColorBuffer.data[pixel_idx + 3]! += 125; // alpha 
@@ -32,6 +32,7 @@ export function RenderField() {
  * Renders the field. Doesn't handle any of the rendering calculations itself, just reads. 
  */
 export function RenderFieldBuffer(buffer : Uint8ClampedArray) {
+    ColorBuffer.data.fill(0); // guarentees synchronized 0; 
     const pixels : ImageDataArray = ColorBuffer.data; 
     const pxInfoNo : number = WIDTH * HEIGHT * 4; // # of px on screen * # |rgba|
     let r = 0; let g = 0;let b = 0; let a = 0; 
