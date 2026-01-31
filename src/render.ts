@@ -1,6 +1,5 @@
-import { FIELDS, PARTICLE_COUNT, ParticleBuffer, PixelBuffer, ColorBuffer, WIDTH, HEIGHT, CPU_CORES, PIXEL_FIELDS } from "./structs/global";
+import { FIELDS, PARTICLE_COUNT, ParticleBuffer, ColorBuffer, WIDTH, HEIGHT, PIXEL_FIELDS, WORKER_COUNT } from "./structs/global";
 // this represents the color each pixel based on particle positions within ParticleBuffer
-
 
 const canvas : HTMLCanvasElement = document.getElementById("particle")! as HTMLCanvasElement;
 const context : CanvasRenderingContext2D = canvas.getContext('2d')!;
@@ -16,36 +15,43 @@ export function RenderField() {
         if (x > WIDTH || x < 0) continue;
         const y : number = ParticleBuffer[i * FIELDS + 1]!; 
         if (y > HEIGHT || y < 0) continue;
-        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * 4; 
+        const pixel_idx : number = ((y | 0) * WIDTH + (x | 0)) * 4; // bytelength for Colorbuffer.data
         
         // handle z-case here, in general should be fine. 
         // colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!)
-        ColorBuffer.data[pixel_idx]! += 80 + colorFromVelocity(ParticleBuffer[i * FIELDS + 2]!, ParticleBuffer[i * FIELDS + 3]!);     // red 
-        ColorBuffer.data[pixel_idx + 1]! += 80; // green
-        ColorBuffer.data[pixel_idx + 2]! += 80; // blue
+        ColorBuffer.data[pixel_idx]! += 60 + colorFromVelocity(ParticleBuffer[i * FIELDS + 3]!, ParticleBuffer[i * FIELDS + 4]!);     // red 
+        ColorBuffer.data[pixel_idx + 1]! += 80;  // green
+        ColorBuffer.data[pixel_idx + 2]! += 80;  // blue
         ColorBuffer.data[pixel_idx + 3]! += 125; // alpha 
     }
     context.putImageData(ColorBuffer, 0, 0);
 }
 
 /**
- * Renders the field. Doesn't handle any of the rendering calculations itself, just reads. 
+ * Given Uint8Clamped array representing a ImageDataArray, renders it to canvas. 
+ * @param buffer UInt32Array or ImageDataArray. 
  */
-export function RenderFieldBuffer(buffer : Int8Array) {
+export function RenderFieldBuffer(buffer : Uint32Array) : void {
+    console.log(buffer);
+    ColorBuffer.data.fill(0); 
     const pixels : ImageDataArray = ColorBuffer.data; 
-    const pxInfoNo : number = WIDTH * HEIGHT * 4; // # of px on screen * # |rgba|
-    let r = 0; let g = 0;let b = 0; let a = 0; 
     for (let i = 0; i < WIDTH * HEIGHT; i++) {
-        for (let j = 0; j < CPU_CORES; j++) {
-            r! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS]!;
-            g! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 1]!;
-            b! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 2]!;
-            a! += PixelBuffer[j * pxInfoNo + i * PIXEL_FIELDS + 3]!;
+        let r = 0; let g = 0; let b = 0; 
+        // WORKER_COUNT number of layers we need to composite together
+        // Read defs in global.ts for more information. 
+        for (let j = 0; j < WORKER_COUNT; j++) {
+            const offset : number = j * WIDTH * HEIGHT;
+            const curr_col : number = buffer[offset + i]!; 
+            r += buffer[offset]!; // to binary, shift to get field in question. 
+            g += buffer[offset+1]!; 
+            b += buffer[offset+2]!; 
+            // console.log(`${r}, ${g}, ${b}`)
+            // alpha constant 
         }
-        pixels[i*PIXEL_FIELDS] = r; 
-        pixels[i*PIXEL_FIELDS + 1] = g; 
-        pixels[i*PIXEL_FIELDS + 2] = b; 
-        pixels[i*PIXEL_FIELDS + 3] = a; 
+        pixels[i*4] = Math.min(255, r);
+        pixels[i*4 + 1] = Math.min(255, g);
+        pixels[i*4 + 2] = Math.min(255, b);
+        pixels[i*4 + 3] = 80;
     }
     context.putImageData(ColorBuffer, 0, 0);
 }
