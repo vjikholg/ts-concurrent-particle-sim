@@ -1,4 +1,4 @@
-import { FIELDS, PARTICLE_COUNT, ParticleBuffer, ColorBuffer, WIDTH, HEIGHT, PIXEL_FIELDS, WORKER_COUNT } from "./structs/global";
+import { FIELDS, PARTICLE_COUNT, ParticleBuffer, ColorBuffer, WIDTH, HEIGHT, WORKER_COUNT } from "./structs/global";
 // this represents the color each pixel based on particle positions within ParticleBuffer
 
 const canvas : HTMLCanvasElement = document.getElementById("particle")! as HTMLCanvasElement;

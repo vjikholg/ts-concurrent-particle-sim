@@ -96,6 +96,7 @@ const setup = (event : MessageEvent) => {
     ]
 }
 
+
 /**
  * Advances a simulation by dt ticks, and renders a composite
  * Composites from each worker is combined in the main thread. 
@@ -128,7 +129,7 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
         if (x < 0 || x >= inputs[4]! || y < 0 || y >= inputs[5]!) continue
         const pxIdx : number = (x | 0) * inputs[4]! + (y | 0);  
 
-        const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx] ?? 0xF;
+        const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx] ?? 0x00;
         const r = (packed_rgb) >> 16 & 0xFF; 
         const g = (packed_rgb) >> 8 & 0xFF; 
         const b = (packed_rgb) & 0xFF; 

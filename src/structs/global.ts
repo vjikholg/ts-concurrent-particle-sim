@@ -40,7 +40,6 @@ export const WORKER_POOL : Worker[] = [];
 // workers are assigned a section of the large PixelBuffer, and writes into it
 // Each section is then composited by the main thread to create one frame 
 // since we're using RGB, we need size: width * height * fields (which is 3) * # of workers 
-export let PIXEL_FIELDS : number = 3; // rgb 
 export let PixelBufferA : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
 export let PixelBufferB : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
 
