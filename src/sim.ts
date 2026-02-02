@@ -1,5 +1,5 @@
 import { RenderField, RenderFieldBuffer } from "./render";
-import { CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, ActivePixelBuffer, SwapBuffer, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, InactivePixelBuffer } from "./structs/global";
+import { CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, ActivePixelBuffer, SwapBuffer, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, InactivePixelBuffer, SIGNAL_PAUSE } from "./structs/global";
 
 export const perfStats = {
     fps: 0, 
@@ -17,7 +17,7 @@ const FPS_EMA_ALPHA : number  = 0.1;
  */
 export function runSimulationMultithreaded(curr_time: number) : void { 
     PerfHandlerInit(curr_time);
-    RequestSimulation();
+    PerfHandlerRender(RequestSimulation);
 }
 
 /**
@@ -54,6 +54,7 @@ export function MessageHandler(event: MessageEvent) : void {
         requestAnimationFrame(RequestSimulation);
         active_workers = WORKER_COUNT;
     }
+    return;
 }
 
 /**

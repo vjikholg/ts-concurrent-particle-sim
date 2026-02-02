@@ -3,6 +3,8 @@ console.log("worker created");
 
 let PrevEvent : MessageEvent; 
 let first : boolean = true; 
+let first_temp : boolean = true;
+let frames : number = 0;
 
 const GRAVITY_FIELDS = 7;
 const SIGNAL_RUN : number = 0;
@@ -105,9 +107,12 @@ const setup = (event : MessageEvent) => {
  */
 const simulate = (ActivePixelBuffer : Uint32Array) : void => {
     // wipe existing composite position
-    const CanvasPixels : number = inputs[4]! * inputs[5]!;
-    const PixelsOffset : number = worker_id * CanvasPixels;
-    ActivePixelBuffer.fill(0, PixelsOffset, (PixelsOffset + CanvasPixels)*3); // rgb so 3 fields/px
+    const width : number = inputs[4] ?? 1920
+    const height : number = inputs[5] ?? 1080
+
+    const CanvasPixels : number = width * height;                             // # of pixels 
+    const PixelsOffset : number = worker_id * CanvasPixels;                   // total = WORKER_COUNT * CanvasPixels
+    ActivePixelBuffer.fill(0, PixelsOffset, (PixelsOffset + CanvasPixels)); // rgb so 3 fields/px
 
     // update particle information 
     const dt : number = SimDataView[0]!;
@@ -126,20 +131,37 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
             ParticleView[i*fields+4]! += accel[1]!; 
         }
         
-        if (x < 0 || x >= inputs[4]! || y < 0 || y >= inputs[5]!) continue
+        if (x < 0 || x >= width) continue;
+        if (y < 0 || y >= height) continue;
+
         const pxIdx : number = (x | 0) * inputs[4]! + (y | 0);  
 
-        const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx] ?? 0x00;
-        const r = (packed_rgb) >> 16 & 0xFF; 
-        const g = (packed_rgb) >> 8 & 0xFF; 
+        const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx]!;
+        const r = (packed_rgb >> 16)  & 0xFF; 
+        const g = (packed_rgb >> 8)  & 0xFF; 
         const b = (packed_rgb) & 0xFF; 
         
-        const r_new : number = ((r + 25 + 255 * 0.2) & 0xff) << 16;
-        const g_new : number = ((g + 25 + 255 * 0.2) & 0xff) << 8;
-        const b_new : number = (b + 25 + 255 * 0.2) & 0xff;
-        
+        const r_new : number = (clamp((r + 25) + 255 ) & 0xff) << 16;
+        const g_new : number = (clamp((g + 25) + 255 ) & 0xff) << 8;
+        const b_new : number = clamp((b + 25) + 255 ) & 0xff;
         ActivePixelBuffer[PixelsOffset + pxIdx] = r_new | g_new | b_new;
-    }
+        // if (first_temp) {
+        //     console.log(`
+        //         offset + pxIdx: ${PixelsOffset + pxIdx}
+        //         PixelsOffset: ${PixelsOffset},
+        //         pxIdx: ${pxIdx}, 
+        //         worker_id: ${worker_id}, 
+        //         CanvasPixels: ${CanvasPixels}
+        //         `)
+        //     console.log("pixelbuff:",  ActivePixelBuffer[PixelsOffset + pxIdx])
+        //     console.log("rgb: ",r,g,b);
+        //     console.log("rgb_new:", r_new >> 16, g_new >> 8, b_new, r_new|g_new|b_new);
+        //     console.log(ActivePixelBuffer.length)
+        //     console.log(ActivePixelBuffer);
+        //     if (frames > 10) first_temp = false;
+        // }
+        // frames++
+    }   
 }
 
 /**
@@ -155,4 +177,16 @@ function colorFromVelocity(dx: number, dy: number, dz?: number) : number {
     return color;
 }
 
-
+// clamps a given number between 0 - 256; 
+function clamp(n : number) { 
+    // 1. -(n >= 0) is a bitmask to check if n < 0.
+    // n >= 0 yields n &= (0xffffff) so does nothing 
+    // n <= 0 yields n &= (0x000000) so zeroes out n
+    n &= -(n >= 0);
+    // 2. detects overflow above 255
+    // t = 255 - n
+    // n <= 255 -> t >= 0, its sign bit (32nd position) is 0, so t >> 31 = 0x000000
+    // n > 255 -> t < 0, signbit is 1, so t >> 31 yields 0xFFFFFF (-1) 
+    // 3. n | mask: if overflow, force all bits to 1, or 0xFFFFFF
+    return n | ((255 - n) >> 31);
+}

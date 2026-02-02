@@ -32,7 +32,7 @@ export function RenderField() {
  * @param buffer UInt32Array or ImageDataArray. 
  */
 export function RenderFieldBuffer(buffer : Uint32Array) : void {
-    console.log(buffer);
+    // console.log(buffer);
     ColorBuffer.data.fill(0); 
     const pixels : ImageDataArray = ColorBuffer.data; 
     for (let i = 0; i < WIDTH * HEIGHT; i++) {
@@ -42,15 +42,15 @@ export function RenderFieldBuffer(buffer : Uint32Array) : void {
         for (let j = 0; j < WORKER_COUNT; j++) {
             const offset : number = j * WIDTH * HEIGHT;
             const curr_col : number = buffer[offset + i]!; 
-            r += buffer[offset]!; // to binary, shift to get field in question. 
-            g += buffer[offset+1]!; 
-            b += buffer[offset+2]!; 
+            r += (curr_col >> 16) & 0xFF; // to binary, shift to get field in question. 
+            g += (curr_col >> 8) & 0xFF; 
+            b += curr_col & 0xFF; 
             // console.log(`${r}, ${g}, ${b}`)
             // alpha constant 
         }
-        pixels[i*4] = Math.min(255, r);
-        pixels[i*4 + 1] = Math.min(255, g);
-        pixels[i*4 + 2] = Math.min(255, b);
+        pixels[i*4] = r;
+        pixels[i*4 + 1] = g;
+        pixels[i*4 + 2] = b
         pixels[i*4 + 3] = 80;
     }
     context.putImageData(ColorBuffer, 0, 0);

@@ -1,10 +1,11 @@
 import { MessageHandler } from "./sim";
 import { WORKER_CHUNK_SIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, 
-    ParticleBuffer, GravityBuffer, SimulationData} from "./structs/global";
+    ParticleBuffer, GravityBuffer, SimulationData,
+    WORKER_COUNT} from "./structs/global";
 
 const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
-const WIDTH : number = window.innerWidth; 
-const HEIGHT : number = window.innerHeight;
+const WIDTH : number =  1080; 
+const HEIGHT : number = 1920;
 let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight)
 
 /**
@@ -28,7 +29,7 @@ export function InitializeParticleField(buffer: Float32Array) : void {
 }
 
 export function InitializeWorkers(pool : Worker[]) : void { 
-    for (let i = 0; i < CPU_CORES; i++) {
+    for (let i = 0; i < WORKER_COUNT; i++) {
         const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: 'module' });
         worker.addEventListener('message', MessageHandler)
         worker.addEventListener('error', (event) => {
@@ -62,17 +63,17 @@ export function InitializeSimViewData() : void {
     SimulationData[4] = WIDTH; 
     SimulationData[5] = HEIGHT; 
     
-    function updateMouse(x: number, y: number) {
-        SimulationData[1] = x; 
-        SimulationData[2] = y;
-    }
-    function updateBorder(width: number, height: number) {
-        SimulationData[4] = width; 
-        SimulationData[5] = height; 
-    }
-
-    AddMouseListener(window, updateMouse);
-    AddResizeListener(window, updateBorder);
+    // function updateMouse(x: number, y: number) {
+    //     SimulationData[1] = x; 
+    //     SimulationData[2] = y;
+    // }
+    // function updateBorder(width: number, height: number) {
+    //     SimulationData[4] = width; 
+    //     SimulationData[5] = height; 
+    // }
+    // 
+    // AddMouseListener(window, updateMouse);
+    // AddResizeListener(window, updateBorder);
     console.log("sim view data init'd");
 }
 
