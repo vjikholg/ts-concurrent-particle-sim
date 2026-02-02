@@ -105,3 +105,49 @@ export function runSimulation(curr_time: number) : void {
     perfStats.renderMs = performance.now() - renderStart;
     requestAnimationFrame(runSimulation);
 }
+
+/**
+ * // src/sim.ts
+let readyWorkers = 0;
+let pendingWorkers = 0;
+let frameId = 0;
+
+function RequestSimulation(): void {
+  pendingWorkers = WORKER_COUNT;
+  const frame = ++frameId;
+  for (const worker of WORKER_POOL) {
+    worker.postMessage({ type: SIGNAL_RUN, frame, ActivePixelBuffer });
+  }
+}
+
+export function runSimulationMultithreaded(curr_time: number): void {
+  PerfHandlerInit(curr_time);
+  RequestSimulation();
+}
+
+export function MessageHandler(event: MessageEvent): void {
+  const { id, frame } = event.data ?? {};
+
+  if (id === SIGNAL_READY) {
+    if (++readyWorkers === WORKER_COUNT) {
+      requestAnimationFrame(runSimulationMultithreaded);
+    }
+    return;
+  }
+
+  if (id === SIGNAL_DONE) {
+    if (frame !== frameId) return; // optional: ignore stale DONEs
+    if (--pendingWorkers > 0) return;
+
+    const renderStart = performance.now();
+    SwapBuffer();
+    RenderFieldBuffer(InactivePixelBuffer);
+    perfStats.renderMs = performance.now() - renderStart;
+
+    requestAnimationFrame(runSimulationMultithreaded);
+  }
+}
+ * 
+ * 
+ * 
+ */
