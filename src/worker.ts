@@ -146,24 +146,24 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
         const b_new : number = clamp((b + 45) ) & 0xff;
         ActivePixelBuffer[PixelsOffset + pxIdx] = r_new | g_new | b_new;
 
-        if (first_temp) {
-            console.log("width, height", width, height)
-            console.log("x,y,dx,dy",x,y,dx,dy)
-            console.log(`
-                offset + pxIdx: ${PixelsOffset + pxIdx}
-                PixelsOffset: ${PixelsOffset},
-                pxIdx: ${pxIdx}, 
-                worker_id: ${worker_id}, 
-                CanvasPixels: ${CanvasPixels}
-                `)
-            console.log("pixelbuff:",  ActivePixelBuffer[PixelsOffset + pxIdx])
-            console.log("rgb: ",r,g,b);
-            console.log("rgb_new:", r_new >> 16, g_new >> 8, b_new, r_new|g_new|b_new);
-            console.log(ActivePixelBuffer.length)
-            console.log(ActivePixelBuffer);
-            if (frames > 10) first_temp = false;
-        }
-        frames++
+        // if (first_temp) {
+        //     console.log("width, height", width, height)
+        //     console.log("x,y,dx,dy",x,y,dx,dy)
+        //     console.log(`
+        //         offset + pxIdx: ${PixelsOffset + pxIdx}
+        //         PixelsOffset: ${PixelsOffset},
+        //         pxIdx: ${pxIdx}, 
+        //         worker_id: ${worker_id}, 
+        //         CanvasPixels: ${CanvasPixels}
+        //         `)
+        //     console.log("pixelbuff:",  ActivePixelBuffer[PixelsOffset + pxIdx])
+        //     console.log("rgb: ",r,g,b);
+        //     console.log("rgb_new:", r_new >> 16, g_new >> 8, b_new, r_new|g_new|b_new);
+        //     console.log(ActivePixelBuffer.length)
+        //     console.log(ActivePixelBuffer);
+        //     if (frames > 10) first_temp = false;
+        // }
+        // frames++
     }   
 }
 
