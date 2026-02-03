@@ -35,12 +35,13 @@ export function RenderFieldBuffer(buffer : Uint32Array) : void {
     // console.log(buffer);
     ColorBuffer.data.fill(0); 
     const pixels : ImageDataArray = ColorBuffer.data; 
-    for (let i = 0; i < WIDTH * HEIGHT; i++) {
+    const total_pixels : number = WIDTH*HEIGHT; 
+    for (let i = 0; i < total_pixels; i++) {
         let r = 0; let g = 0; let b = 0; 
         // WORKER_COUNT number of layers we need to composite together
         // Read defs in global.ts for more information. 
         for (let j = 0; j < WORKER_COUNT; j++) {
-            const offset : number = j * WIDTH * HEIGHT;
+            const offset : number = j * total_pixels;
             const curr_col : number = buffer[offset + i]!; 
             r += (curr_col >> 16) & 0xFF; // to binary, shift to get field in question. 
             g += (curr_col >> 8) & 0xFF; 

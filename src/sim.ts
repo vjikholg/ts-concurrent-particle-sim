@@ -1,11 +1,24 @@
 import { RenderField, RenderFieldBuffer } from "./render";
-import { CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, ActivePixelBuffer, SwapBuffer, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, InactivePixelBuffer, SIGNAL_PAUSE } from "./structs/global";
+import { WIDTH, HEIGHT, CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, SIGNAL_PAUSE } from "./structs/global";
 
 export const perfStats = {
     fps: 0, 
     frameMs: 0,
     renderMs: 0
 };
+
+// pixel buffers 
+// workers are assigned a section of the large PixelBuffer, and writes into it
+// Each section is then composited by the main thread to create one frame 
+// we byte pack an 8 bit value into a 32 bit section of memory
+// mathematically, we pad via +256 
+const PixelBufferA : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
+const PixelBufferB : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
+console.log("pxbuffer.length A,B: ", PixelBufferA.length, PixelBufferB.length )
+
+let ActivePixelBuffer = PixelBufferA;
+let InactivePixelBuffer = PixelBufferB;
+
 
 let last_time : number = 0;
 let emaFrameMs : number = 16.7; 
@@ -16,21 +29,22 @@ const FPS_EMA_ALPHA : number  = 0.1;
  * @param curr_time current time used for perf stats. 
  */
 export function runSimulationMultithreaded(curr_time: number) : void { 
+    const dt : number = Math.min(1, (curr_time - last_time)/1000); 
+    SimulationData[0] = dt;
     PerfHandlerInit(curr_time);
-    PerfHandlerRender(RequestSimulation);
+    PerfHandlerRender(RequestSimulation, curr_time);
 }
 
 /**
  * Simulation Controller. Posts Active Pixel Buffer, swap, then requests a render. 
  */
+let pendingWorkers : number = 0;
+let frameId = 0;
 function RequestSimulation() : void {
+    pendingWorkers = WORKER_COUNT; 
     WORKER_POOL.forEach((worker : Worker) => { 
         worker.postMessage({type: 1, ActivePixelBuffer});
     }); 
-    SwapBuffer();
-    RenderFieldBuffer(InactivePixelBuffer); 
-    requestAnimationFrame(runSimulationMultithreaded)
-    // console.log("simulation requested!");
 }
 
 /**
@@ -39,22 +53,25 @@ function RequestSimulation() : void {
  */
 let active_workers : number = WORKER_COUNT; 
 let ready_workers : number = 0; 
-export function MessageHandler(event: MessageEvent) : void {
+export function MessageHandler(event: MessageEvent) : void {    
     if (event.data?.id === SIGNAL_READY) {
         console.log(`worker ${event.data?.worker_id} out of ${WORKER_COUNT} ready`); 
-        ready_workers++; 
-
+        ready_workers++
         if (ready_workers === WORKER_COUNT){
-            RequestSimulation()
+            requestAnimationFrame(runSimulationMultithreaded);
         }
-
-    } else if (event.data?.id === SIGNAL_DONE) {
-        active_workers--; 
-        if (active_workers > 0) return; 
-        requestAnimationFrame(RequestSimulation);
+        return
+    } 
+    
+    if (event.data?.id === SIGNAL_DONE) { 
+        // console.log(active_workers);
+        if (--active_workers > 0) return; 
+        ActivePixelBuffer = ActivePixelBuffer === PixelBufferA ? PixelBufferB : PixelBufferA
+        InactivePixelBuffer = InactivePixelBuffer === PixelBufferA ? PixelBufferB : PixelBufferA
+        RenderFieldBuffer(InactivePixelBuffer);
+        requestAnimationFrame(runSimulationMultithreaded);
         active_workers = WORKER_COUNT;
     }
-    return;
 }
 
 /**
@@ -75,9 +92,9 @@ function PerfHandlerInit(curr_time: number) : void {
  * Generic render performance calculator;
  * @param fn function we're measuring runtime with.
  */
-function PerfHandlerRender(fn : Function) : void {
+function PerfHandlerRender(fn: Function, curr_time? : number) : void {
     const renderStart : number = performance.now(); 
-    fn(); 
+    curr_time ? fn(curr_time) : fn(); 
     perfStats.renderMs = performance.now() - renderStart; 
 }
 
@@ -105,49 +122,3 @@ export function runSimulation(curr_time: number) : void {
     perfStats.renderMs = performance.now() - renderStart;
     requestAnimationFrame(runSimulation);
 }
-
-/**
- * // src/sim.ts
-let readyWorkers = 0;
-let pendingWorkers = 0;
-let frameId = 0;
-
-function RequestSimulation(): void {
-  pendingWorkers = WORKER_COUNT;
-  const frame = ++frameId;
-  for (const worker of WORKER_POOL) {
-    worker.postMessage({ type: SIGNAL_RUN, frame, ActivePixelBuffer });
-  }
-}
-
-export function runSimulationMultithreaded(curr_time: number): void {
-  PerfHandlerInit(curr_time);
-  RequestSimulation();
-}
-
-export function MessageHandler(event: MessageEvent): void {
-  const { id, frame } = event.data ?? {};
-
-  if (id === SIGNAL_READY) {
-    if (++readyWorkers === WORKER_COUNT) {
-      requestAnimationFrame(runSimulationMultithreaded);
-    }
-    return;
-  }
-
-  if (id === SIGNAL_DONE) {
-    if (frame !== frameId) return; // optional: ignore stale DONEs
-    if (--pendingWorkers > 0) return;
-
-    const renderStart = performance.now();
-    SwapBuffer();
-    RenderFieldBuffer(InactivePixelBuffer);
-    perfStats.renderMs = performance.now() - renderStart;
-
-    requestAnimationFrame(runSimulationMultithreaded);
-  }
-}
- * 
- * 
- * 
- */

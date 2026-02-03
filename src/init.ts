@@ -1,12 +1,10 @@
 import { MessageHandler } from "./sim";
 import { WORKER_CHUNK_SIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, 
     ParticleBuffer, GravityBuffer, SimulationData,
-    WORKER_COUNT} from "./structs/global";
+    WORKER_COUNT, WIDTH, HEIGHT} from "./structs/global";
 
 const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
-const WIDTH : number =  1080; 
-const HEIGHT : number = 1920;
-let colorbuffer : ImageData = new ImageData(window.innerWidth, window.innerHeight)
+
 
 /**
  * buffer[0] - buffer[6] contain info in following order: (x,y,z,dx,dy,dz)

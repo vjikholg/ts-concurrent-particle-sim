@@ -1,6 +1,7 @@
 // hardware
-export const WIDTH = 1920; 
-export const HEIGHT = 1080;
+export const WIDTH = window.innerWidth; 
+export const HEIGHT = window.innerHeight;
+console.log(WIDTH, HEIGHT)
 export const CPU_CORES = navigator.hardwareConcurrency;
 export const WORKER_COUNT = CPU_CORES-1;
 
@@ -15,7 +16,7 @@ export const WORKER_CHUNK_SIZE : number = Math.floor(PARTICLE_COUNT/CPU_CORES);
 // contiguity = speed, instead of array<particle> we keep typearray<float>. 
 export const rawParticleBuffer : SharedArrayBuffer = new SharedArrayBuffer(BYTES_PER_PARTICLE * PARTICLE_COUNT);
 export const ParticleBuffer : Float32Array = new Float32Array(rawParticleBuffer);
-export const ColorBuffer = new ImageData(1920, 1080);
+export const ColorBuffer = new ImageData(WIDTH, HEIGHT);
 console.log(ColorBuffer.data.length);
 
 // simulation data, i.e., dt, mouse x, y, necessary for future stuff.
@@ -39,27 +40,16 @@ export const SIGNAL_READY : number = 2;
 export const SIGNAL_DONE : number = 3; 
 export const WORKER_POOL : Worker[] = [];
 
-// pixel buffers 
-// workers are assigned a section of the large PixelBuffer, and writes into it
-// Each section is then composited by the main thread to create one frame 
-// we byte pack an 8 bit value into a 32 bit section of memory
-// mathematically, we pad via +256 
-export let PixelBufferA : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
-export let PixelBufferB : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
-console.log("pxbuffer.length A,B: ", PixelBufferA.length, PixelBufferB.length )
 
-
-export let ActivePixelBuffer = PixelBufferA;
-export let InactivePixelBuffer = PixelBufferB;
 /**
  * Swaps active pixel buffers for workers to render to.
  */
-export function SwapBuffer() : void {
-    ActivePixelBuffer = (ActivePixelBuffer === PixelBufferA) ? PixelBufferB : PixelBufferA; 
-    InactivePixelBuffer = (ActivePixelBuffer === PixelBufferB) ? PixelBufferA : PixelBufferB; 
-
-    // console.log(ActivePixelBuffer); 
-    // console.log(InactivePixelBuffer);
-    // console.log(ParticleBuffer);
-
-}
+// export function SwapBuffer() : void {
+//     ActivePixelBuffer = (ActivePixelBuffer === PixelBufferA) ? PixelBufferB : PixelBufferA; 
+//     InactivePixelBuffer = (ActivePixelBuffer === PixelBufferB) ? PixelBufferA : PixelBufferB; 
+// 
+//     // console.log(ActivePixelBuffer); 
+//     // console.log(InactivePixelBuffer);
+//     // console.log(ParticleBuffer);
+// 
+// }

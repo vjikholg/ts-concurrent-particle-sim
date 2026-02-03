@@ -107,8 +107,8 @@ const setup = (event : MessageEvent) => {
  */
 const simulate = (ActivePixelBuffer : Uint32Array) : void => {
     // wipe existing composite position
-    const width : number = inputs[4] ?? 1920
-    const height : number = inputs[5] ?? 1080
+    const width : number = inputs[3] ?? 1920
+    const height : number = inputs[4] ?? 1080
 
     const CanvasPixels : number = width * height;                             // # of pixels 
     const PixelsOffset : number = worker_id * CanvasPixels;                   // total = WORKER_COUNT * CanvasPixels
@@ -134,33 +134,36 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
         if (x < 0 || x >= width) continue;
         if (y < 0 || y >= height) continue;
 
-        const pxIdx : number = (x | 0) * inputs[4]! + (y | 0);  
+        const pxIdx : number = (x | 0) + (y | 0) * width;  
 
         const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx]!;
         const r = (packed_rgb >> 16)  & 0xFF; 
         const g = (packed_rgb >> 8)  & 0xFF; 
         const b = (packed_rgb) & 0xFF; 
         
-        const r_new : number = (clamp((r + 25) + 255 ) & 0xff) << 16;
-        const g_new : number = (clamp((g + 25) + 255 ) & 0xff) << 8;
-        const b_new : number = clamp((b + 25) + 255 ) & 0xff;
+        const r_new : number = (clamp((r + 45)) & 0xff) << 16;
+        const g_new : number = (clamp((g + 45)) & 0xff) << 8;
+        const b_new : number = clamp((b + 45) ) & 0xff;
         ActivePixelBuffer[PixelsOffset + pxIdx] = r_new | g_new | b_new;
-        // if (first_temp) {
-        //     console.log(`
-        //         offset + pxIdx: ${PixelsOffset + pxIdx}
-        //         PixelsOffset: ${PixelsOffset},
-        //         pxIdx: ${pxIdx}, 
-        //         worker_id: ${worker_id}, 
-        //         CanvasPixels: ${CanvasPixels}
-        //         `)
-        //     console.log("pixelbuff:",  ActivePixelBuffer[PixelsOffset + pxIdx])
-        //     console.log("rgb: ",r,g,b);
-        //     console.log("rgb_new:", r_new >> 16, g_new >> 8, b_new, r_new|g_new|b_new);
-        //     console.log(ActivePixelBuffer.length)
-        //     console.log(ActivePixelBuffer);
-        //     if (frames > 10) first_temp = false;
-        // }
-        // frames++
+
+        if (first_temp) {
+            console.log("width, height", width, height)
+            console.log("x,y,dx,dy",x,y,dx,dy)
+            console.log(`
+                offset + pxIdx: ${PixelsOffset + pxIdx}
+                PixelsOffset: ${PixelsOffset},
+                pxIdx: ${pxIdx}, 
+                worker_id: ${worker_id}, 
+                CanvasPixels: ${CanvasPixels}
+                `)
+            console.log("pixelbuff:",  ActivePixelBuffer[PixelsOffset + pxIdx])
+            console.log("rgb: ",r,g,b);
+            console.log("rgb_new:", r_new >> 16, g_new >> 8, b_new, r_new|g_new|b_new);
+            console.log(ActivePixelBuffer.length)
+            console.log(ActivePixelBuffer);
+            if (frames > 10) first_temp = false;
+        }
+        frames++
     }   
 }
 
