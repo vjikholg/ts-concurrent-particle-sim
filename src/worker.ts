@@ -110,10 +110,6 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
     const width : number = inputs[3] ?? 1920
     const height : number = inputs[4] ?? 1080
 
-    const CanvasPixels : number = width * height;                             // # of pixels 
-    const PixelsOffset : number = worker_id * CanvasPixels;                   // total = WORKER_COUNT * CanvasPixels
-    ActivePixelBuffer.fill(0, PixelsOffset, (PixelsOffset + CanvasPixels)); // rgb so 3 fields/px
-
     // update particle information 
     const dt : number = SimDataView[0]!;
     for (let i = start; i < end; i++) {
@@ -135,16 +131,7 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
         if (y < 0 || y >= height) continue;
 
         const pxIdx : number = (x | 0) + (y | 0) * width;  
-
-        const packed_rgb : number = ActivePixelBuffer[PixelsOffset + pxIdx]!;
-        const r = (packed_rgb >> 16)  & 0xFF; 
-        const g = (packed_rgb >> 8)  & 0xFF; 
-        const b = (packed_rgb) & 0xFF; 
-        
-        const r_new : number = (clamp((r + 45)) & 0xff) << 16;
-        const g_new : number = (clamp((g + 45)) & 0xff) << 8;
-        const b_new : number = clamp((b + 45) ) & 0xff;
-        ActivePixelBuffer[PixelsOffset + pxIdx] = r_new | g_new | b_new;
+        ActivePixelBuffer[pxIdx]!++; 
 
         // if (first_temp) {
         //     console.log("width, height", width, height)

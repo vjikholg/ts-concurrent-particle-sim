@@ -33,25 +33,17 @@ export function RenderField() {
  */
 export function RenderFieldBuffer(buffer : Uint32Array) : void {
     const pixels : ImageDataArray = ColorBuffer.data; 
+    pixels.fill(0);
     const total_pixels : number = WIDTH*HEIGHT; 
-    for (let i = 0; i < total_pixels; i++) {
-        let r = 0; let g = 0; let b = 0; 
-        let offset = 0;
-        // WORKER_COUNT number of layers we need to composite together
-        // Read defs in global.ts for more information. 
-        for (let j = 0; j < WORKER_COUNT; j++) {           // TODO : 150ms call here 
-            const curr_col : number = buffer[offset + i]!; // TODO: 350ms call here
-            r += (curr_col >> 16) & 0xFF;                  
-            g += (curr_col >> 8) & 0xFF; 
-            b += curr_col & 0xFF; 
-            offset += total_pixels;
-        }
-        pixels[i*4] = r;
-        pixels[i*4 + 1] = g;
-        pixels[i*4 + 2] = b
+    for (let i = 0; i < total_pixels; i++) {   
+        const count : number = buffer[i]!  
+        pixels[i*4] = count * 60;;
+        pixels[i*4 + 1] = count * 60;
+        pixels[i*4 + 2] = count * 60
         pixels[i*4 + 3] = 80;
     }
     context.putImageData(ColorBuffer, 0, 0);
+    buffer.fill(0);
 }
 
 /**

@@ -12,8 +12,8 @@ export const perfStats = {
 // Each section is then composited by the main thread to create one frame 
 // we byte pack an 8 bit value into a 32 bit section of memory
 // mathematically, we pad via +256 
-const PixelBufferA : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
-const PixelBufferB : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4 * WORKER_COUNT));
+const PixelBufferA : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4));
+const PixelBufferB : Uint32Array = new Uint32Array(new SharedArrayBuffer(WIDTH * HEIGHT * 4));
 console.log("pxbuffer.length A,B: ", PixelBufferA.length, PixelBufferB.length )
 
 let ActivePixelBuffer = PixelBufferA;
