@@ -37,7 +37,7 @@ export function RenderFieldBuffer(buffer : Uint32Array) : void {
     const total_pixels : number = WIDTH*HEIGHT; 
     for (let i = 0; i < total_pixels; i++) {   
         const count : number = buffer[i]!  
-        pixels[i*4] = count * 60;;
+        pixels[i*4] = count * 60;
         pixels[i*4 + 1] = count * 60;
         pixels[i*4 + 2] = count * 60
         pixels[i*4 + 3] = 80;

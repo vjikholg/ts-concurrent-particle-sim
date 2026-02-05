@@ -1,5 +1,5 @@
 ![preview-png](previews/image1.png)
-A Web Worker–multithreaded particle simulation that targets 60 FPS in the browser without relying on WebAssembly or GPU APIs. This project is a proof-of-concept for CPU-side concurrency and rendering performance using `SharedArrayBuffer` and double-buffered pixel data.
+A Web Worker–multithreaded particle simulation that targets 60 FPS simulating 1,000,000 particles and their movements in the browser (using gravity!) without relying on WebAssembly or GPU APIs. This project is a proof-of-concept for CPU-side concurrency and rendering performance using `SharedArrayBuffer` and double-buffered pixel data. 
 
 ## Features
 - **Multithreaded simulation and rendering** using a worker pool sized to available CPU cores.
