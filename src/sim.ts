@@ -170,30 +170,16 @@ function edgeForce(x: number, y: number, alpha: number = 0.0001, eps : number = 
     const d_abs : number = Math.min(x, WIDTH - x, y, HEIGHT-y);
 
     if (d_abs > 100) return [0,0]
-    const d_x : number = x/d_abs; 
-    const d_y : number = y/d_abs;
-    
-    const g_edge : number = 1/(d_abs + eps)**alpha; 
-    
-    const v_x : number = k * g_edge * d_x * 5;
-    const v_y : number = k * g_edge * d_y * 5;
 
-    console.log(d_abs, d_x, d_y, g_edge, v_x, v_y);
-    return [v_x, v_y]
+    const dx : number = WIDTH/2 - x;
+    const dy : number = HEIGHT/2 - y;
+    const mag : number = Math.hypot(dx,dy);
 
+    const dx_hat : number = dx/mag; 
+    const dy_hat : number = dy/mag; 
 
-    // const ax : number = x - WIDTH/2;
-    // const ay : number = y - HEIGHT/2; 
+    const g: number = 1/(d_abs + eps)**alpha;
 
-    // const mag : number = Math.hypot(x,y) + delta
-    // const ax_hat : number = ax/mag;
-    // const ay_hat : number = ay/mag;
+    return [k*dx_hat*g, k*dy_hat*g]
 
-    // const d1 : number = distance(x,y,0,0);
-    // const d2 : number = distance(x,y,WIDTH,0);
-    // const d3 : number = distance(x,y,0,HEIGHT);
-    // const d4 : number = distance(x,y,WIDTH,HEIGHT);
-    // const gp : number = 1/((d1+eps)**alpha) + 1/((d2+eps)**alpha) + 1/((d3+eps)**alpha) + 1/((d4+eps)**alpha);
-    // console.log(d1,d2,d3,d4,[gp * ax_hat* 10, gp * ay_hat* 10]);
-    // return [gp * ax_hat * 10, gp * ay_hat * 10];
 }

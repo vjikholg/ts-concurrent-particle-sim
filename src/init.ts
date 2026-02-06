@@ -49,9 +49,9 @@ export function InitializeWorkers(pool : Worker[]) : void {
 }
 
 export function InitializeTestGravity() : void {
-    InitGravitySource(WIDTH/2 - 200, HEIGHT/2, Math.random()*5, 10,   20000);
-    InitGravitySource(WIDTH/2 + 200, HEIGHT/2,-(Math.random()*5),-10,   20000);
-    InitGravitySource(WIDTH/2, HEIGHT/2 + 400, -(Math.random()*5),-10,   20000)
+    InitGravitySource(WIDTH/2 - 200, HEIGHT/2, Math.random()*5, 10,   40000);
+    InitGravitySource(WIDTH/2 + 200, HEIGHT/2,-(Math.random()*5),-10,   10000);
+    // InitGravitySource(WIDTH/2, HEIGHT/2 + 400, -(Math.random()*5),-10,   40000)
     console.log("grav view data init'd")
 }
 
@@ -59,17 +59,18 @@ export function InitializeSimViewData() : void {
     SimulationData[4] = WIDTH; 
     SimulationData[5] = HEIGHT; 
     
-    // function updateMouse(x: number, y: number) {
-    //     SimulationData[1] = x; 
-    //     SimulationData[2] = y;
-    // }
-    // function updateBorder(width: number, height: number) {
-    //     SimulationData[4] = width; 
-    //     SimulationData[5] = height; 
-    // }
-    // 
-    // AddMouseListener(window, updateMouse);
-    // AddResizeListener(window, updateBorder);
+    function updateMouse(x: number, y: number) {
+        SimulationData[1] = x; 
+        SimulationData[2] = y;
+    }
+    function updateBorder(width: number, height: number) {
+        SimulationData[4] = width; 
+        SimulationData[5] = height; 
+    }
+    
+    AddMouseListener(window, updateMouse);
+    AddMouseListener(window, InitGravitySource);
+    AddResizeListener(window, updateBorder);
     console.log("sim view data init'd");
 }
 

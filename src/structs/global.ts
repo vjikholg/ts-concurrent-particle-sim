@@ -27,18 +27,28 @@ export const SimulationData = new Float32Array(rawSharedViewSimData);
 // gravitational sources, x,y,z,dx,dy,dz,mass
 export let source_count : number = 0;
 export const GRAVITY_FIELDS : number = 7; 
-export const MAX_GFIELDS : number = 10
+export const MAX_GFIELDS : number = 5;
 export const rawGravityBuffer : SharedArrayBuffer = new SharedArrayBuffer(4 * GRAVITY_FIELDS * MAX_GFIELDS)
 export const GravityBuffer : Float32Array = new Float32Array(rawGravityBuffer);
 
-export function InitGravitySource(x: number, y: number, dx: number, dy: number, m: number) {
+/**
+ * initializes a basic gravity source; 
+ * @param x 
+ * @param y 
+ * @param dx 
+ * @param dy 
+ * @param m 
+ */
+export function InitGravitySource(x: number, y: number, dx?: number, dy?: number, m?: number) {
     if (source_count < MAX_GFIELDS) {
         GravityBuffer[source_count*GRAVITY_FIELDS] = x;
         GravityBuffer[source_count*GRAVITY_FIELDS+1] = y;
-        GravityBuffer[source_count*GRAVITY_FIELDS+3] = dx;
-        GravityBuffer[source_count*GRAVITY_FIELDS+4] = dy; 
-        GravityBuffer[source_count*GRAVITY_FIELDS+6] = m;
+        GravityBuffer[source_count*GRAVITY_FIELDS+3] = dx ?? 0;
+        GravityBuffer[source_count*GRAVITY_FIELDS+4] = dy ?? 0; 
+        GravityBuffer[source_count*GRAVITY_FIELDS+6] = m ?? Math.random()*20000+20000;
         source_count++;
+    } else {
+        console.log(source_count);
     }
 }
 
