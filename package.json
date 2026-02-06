@@ -4,21 +4,20 @@
     "dat-gui": "^0.5.0",
     "lil-gui": "^0.20.0",
     "three": "^0.182.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   },
-  "name":"ts-concurrent-particle-sim",
+  "name": "ts-concurrent-particle-sim",
   "type": "module",
-  "homepage": "https://vjikholg.github.io/ts-conccurent-particle-sim",
+  "homepage": "https://vjikholg.github.io/ts-concurrent-particle-sim",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d src",
-    "dev": "npx tsx index.ts",
-    "build": "npx vite build",
-    "preview": "npx vite preview"
-
+    "deploy": "gh-pages -d dist",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "gh-pages": "^6.3.0",
-    "vite-plugin-cross-origin-isolation": "^0.1.6"
+    "gh-pages": "^6.3.0"
   }
 }

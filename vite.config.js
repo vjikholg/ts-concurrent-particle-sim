@@ -1,8 +1,17 @@
-import crossOriginIsolation from 'vite-plugin-cross-origin-isolation'
+import { defineConfig } from "vite";
 
-export default { 
-    plugins: [
-        crossOriginIsolation(),
-    ],
-    base: '/ts-concurrent-particle-sim'
-}
+const crossOriginIsolationHeaders = {
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Embedder-Policy": "require-corp",
+};
+
+export default defineConfig({
+  // For project pages: https://<user>.github.io/<repo>/
+  base: "/ts-concurrent-particle-sim/",
+  server: {
+    headers: crossOriginIsolationHeaders,
+  },
+  preview: {
+    headers: crossOriginIsolationHeaders,
+  },
+});
