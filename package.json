@@ -6,11 +6,19 @@
     "three": "^0.182.0",
     "typescript": "^5.9.3"
   },
+  "name":"ts-concurrent-particle-sim",
   "type": "module",
-  "script": {
-    "dev": "npx tsx index.ts"
+  "homepage": "https://vjikholg.github.io/ts-conccurent-particle-sim",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d src",
+    "dev": "npx tsx index.ts",
+    "build": "npx vite build",
+    "preview": "npx vite preview"
+
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "vite-plugin-cross-origin-isolation": "^0.1.6"
   }
 }
