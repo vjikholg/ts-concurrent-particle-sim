@@ -1,5 +1,6 @@
+import { GravitationalAcceleration } from "./physics/AccelerationSources";
 import { RenderField, RenderFieldBuffer } from "./render";
-import { WIDTH, HEIGHT, CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, SIGNAL_PAUSE } from "./structs/global";
+import { WIDTH, HEIGHT, CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, SIGNAL_PAUSE, GravityBuffer, source_count, GRAVITY_FIELDS } from "./structs/global";
 
 export const perfStats = {
     fps: 0, 
@@ -33,6 +34,7 @@ export function runSimulationMultithreaded(curr_time: number) : void {
     SimulationData[0] = dt;
     PerfHandlerInit(curr_time);
     PerfHandlerRender(RequestSimulation, curr_time);
+    UpdateGravity(dt);
 }
 
 /**
@@ -121,4 +123,77 @@ export function runSimulation(curr_time: number) : void {
     RenderField(); 
     perfStats.renderMs = performance.now() - renderStart;
     requestAnimationFrame(runSimulation);
+}
+
+function UpdateGravity(dt: number) : void {
+    const ax : number[] = new Array(source_count).fill(0);
+    const ay : number[] = new Array(source_count).fill(0);
+
+    for (let i = 0; i < source_count; i++) {
+        const base = i * GRAVITY_FIELDS; 
+        const x : number = GravityBuffer[base]!;
+        const y : number = GravityBuffer[base+1]!;
+    
+        for (let j = 0; j < source_count; j++) {
+            if (i === j) continue; 
+            const base_j : number = j * GRAVITY_FIELDS;
+            const xs : number = GravityBuffer[base_j]!;
+            const ys : number = GravityBuffer[base_j + 1]!;
+            const m : number = GravityBuffer[base_j + 6]!;
+            const [aX, aY] : number[] = GravitationalAcceleration(m,xs,ys,x,y);
+            
+            ax[i]! += aX!; 
+            ay[i]! += aY!;
+        }
+
+        const [edge_x, edge_y] : number[] = edgeForce(x,y); 
+        ax[i]! += edge_x! * dt;
+        ax[i+1]! += edge_y! * dt;
+    }
+
+    for (let i = 0; i < source_count; i++) { 
+        const base = i * GRAVITY_FIELDS; 
+        GravityBuffer[base + 3]! += ax[i]! * dt;
+        GravityBuffer[base + 4]! += ay[i]! * dt; 
+        
+        GravityBuffer[base]! += GravityBuffer[base+3]!*dt
+        GravityBuffer[base+1]! += GravityBuffer[base+4]!*dt
+    } 
+}
+
+function distance(x1: number, y1: number, x2: number, y2: number) {
+    return Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2-y1)); 
+}
+
+function edgeForce(x: number, y: number, alpha: number = 0.0001, eps : number = 0.01, delta : number = 0.01, k : number = 5) : number[] {
+
+    const d_abs : number = Math.min(x, WIDTH - x, y, HEIGHT-y);
+
+    if (d_abs > 100) return [0,0]
+    const d_x : number = x/d_abs; 
+    const d_y : number = y/d_abs;
+    
+    const g_edge : number = 1/(d_abs + eps)**alpha; 
+    
+    const v_x : number = k * g_edge * d_x * 5;
+    const v_y : number = k * g_edge * d_y * 5;
+
+    console.log(d_abs, d_x, d_y, g_edge, v_x, v_y);
+    return [v_x, v_y]
+
+
+    // const ax : number = x - WIDTH/2;
+    // const ay : number = y - HEIGHT/2; 
+
+    // const mag : number = Math.hypot(x,y) + delta
+    // const ax_hat : number = ax/mag;
+    // const ay_hat : number = ay/mag;
+
+    // const d1 : number = distance(x,y,0,0);
+    // const d2 : number = distance(x,y,WIDTH,0);
+    // const d3 : number = distance(x,y,0,HEIGHT);
+    // const d4 : number = distance(x,y,WIDTH,HEIGHT);
+    // const gp : number = 1/((d1+eps)**alpha) + 1/((d2+eps)**alpha) + 1/((d3+eps)**alpha) + 1/((d4+eps)**alpha);
+    // console.log(d1,d2,d3,d4,[gp * ax_hat* 10, gp * ay_hat* 10]);
+    // return [gp * ax_hat * 10, gp * ay_hat * 10];
 }

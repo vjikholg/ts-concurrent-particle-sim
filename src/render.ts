@@ -39,8 +39,8 @@ export function RenderFieldBuffer(buffer : Uint32Array) : void {
         const count : number = buffer[i]!  
         pixels[i*4] = count * 60;
         pixels[i*4 + 1] = count * 60;
-        pixels[i*4 + 2] = count * 60
-        pixels[i*4 + 3] = 80;
+        pixels[i*4 + 2] = count * 100
+        pixels[i*4 + 3] = 120;
     }
     context.putImageData(ColorBuffer, 0, 0);
     buffer.fill(0);

@@ -1,31 +1,16 @@
 import { GRAVITY_FIELDS, GravityBuffer } from "../structs/global";
 
-const GRAVITATIONAL_CONSTANT : number = 6.67430*10^15; 
-const SAGITARRIUS : number = 8.54*10^36;
+const GRAVITATIONAL_CONSTANT : number = 6.67430 * 15; 
+const eps : number = 100
 
-export function GravitationalAcceleration(x: number, y: number) : number[] { 
-    let accels : number[] = [0,0]; 
-
-    for (let i = 0 ; i < GravityBuffer.length ; i += GRAVITY_FIELDS) {
-        // get incident angle
-        try {
-            const dy = -(GravityBuffer[i]! - y);
-            const dx = GravityBuffer[i+1]! - x;
-            const theta = Math.atan(dy/dx);
-            
-            let mu = (GRAVITATIONAL_CONSTANT * SAGITARRIUS) / Math.hypot(x,y)**2;
-            accels[0]! += mu*Math.cos(theta);
-            accels[1]! += mu*Math.sin(theta);
-        } catch (exp) {
-            console.log(`broken gravitational reference!: ${i}`);
-            continue;
-        }
-    }
-    return accels;
-}
-
-export function UpdateSources() : void {
-    
-
-
+export function GravitationalAcceleration(m_source: number, x_source: number, y_source: number, x: number, y: number) : number[] { 
+    const dx = x_source-x;
+    const dy = y_source-y;
+    const r2 = Math.max(dx * dx + dy * dy + eps, eps);
+    if (!Number.isFinite(r2) || r2 === 0) return [0,0];
+    const mu = (GRAVITATIONAL_CONSTANT * m_source) / r2;
+    const invR = 1 / Math.sqrt(r2);
+    const ax : number = mu * dx * invR;
+    const ay : number = mu * dy * invR;
+    return [ax,ay];
 }

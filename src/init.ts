@@ -1,7 +1,8 @@
 import { MessageHandler } from "./sim";
 import { WORKER_CHUNK_SIZE, CPU_CORES, FIELDS, PARTICLE_COUNT, 
     ParticleBuffer, GravityBuffer, SimulationData,
-    WORKER_COUNT, WIDTH, HEIGHT} from "./structs/global";
+    WORKER_COUNT, WIDTH, HEIGHT,
+    InitGravitySource} from "./structs/global";
 
 const canvas : HTMLCanvasElement = (document.getElementById("canvas")!) as HTMLCanvasElement;
 
@@ -19,8 +20,8 @@ export function InitializeParticleField(buffer: Float32Array) : void {
         buffer[i*FIELDS]   = Math.random() * WIDTH      // x 
         buffer[i*FIELDS+1] = Math.random() * HEIGHT     // y
         buffer[i*FIELDS+2] = 0                          // z, might be used for alpha.
-        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 10 // dx
-        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 10 // dy
+        buffer[i*FIELDS+3] = (Math.random()*2 - 1) * 100 // dx
+        buffer[i*FIELDS+4] = (Math.random()*2 - 1) * 100 // dy
         buffer[i*FIELDS+5] = 0 // dz unused for now but added just to see perf. 
         buffer[i*FIELDS+6] = (Math.random()*999 + 1)    // mass
     }
@@ -48,12 +49,9 @@ export function InitializeWorkers(pool : Worker[]) : void {
 }
 
 export function InitializeTestGravity() : void {
-    GravityBuffer[0] = WIDTH/2 - 200; 
-    GravityBuffer[1] = HEIGHT/2; 
-    GravityBuffer[6] = 1000;
-    GravityBuffer[7] = WIDTH/2 + 200; 
-    GravityBuffer[8] = HEIGHT/2; 
-    GravityBuffer[13] = 1000;
+    InitGravitySource(WIDTH/2 - 200, HEIGHT/2, Math.random()*5, 10,   20000);
+    InitGravitySource(WIDTH/2 + 200, HEIGHT/2,-(Math.random()*5),-10,   20000);
+    InitGravitySource(WIDTH/2, HEIGHT/2 + 400, -(Math.random()*5),-10,   20000)
     console.log("grav view data init'd")
 }
 

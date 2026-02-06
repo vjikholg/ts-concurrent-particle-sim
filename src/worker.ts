@@ -3,8 +3,8 @@ console.log("worker created");
 
 let PrevEvent : MessageEvent; 
 let first : boolean = true; 
-let first_temp : boolean = true;
-let frames : number = 0;
+// let first_temp : boolean = true;
+// let frames : number = 0;
 
 const GRAVITY_FIELDS = 7;
 const SIGNAL_RUN : number = 0;
@@ -12,7 +12,7 @@ const SIGNAL_PAUSE : number = 1;
 const SIGNAL_READY : number = 2;
 const SIGNAL_DONE : number = 3; 
 const GRAVITATIONAL_CONSTANT : number = 6.67430; 
-const eps : number =  0.001; // prevents acceleration from exploding
+const eps : number =  1; // prevents acceleration from exploding
 
 function GravitationalAcceleration(x: number, y: number, GravityBuffer: Float32Array) : number[] { 
     let ax : number = 0;
@@ -127,8 +127,14 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
             ParticleView[i*fields+4]! += accel[1]!; 
         }
         
-        if (x < 0 || x >= width) continue;
-        if (y < 0 || y >= height) continue;
+        if ((x < 0 || x >= width) || (y < 0 || y >= height)) { 
+            ParticleView[i*fields]! = (Math.random()*width); 
+            ParticleView[i*fields + 1]! = Math.random()*height;
+
+            ParticleView[i*fields+3]! = (Math.random()*2 - 1) * 100;
+            ParticleView[i*fields+4]! = (Math.random()*2 - 1) * 100;
+        }
+        
 
         const pxIdx : number = (x | 0) + (y | 0) * width;  
         ActivePixelBuffer[pxIdx]!++; 

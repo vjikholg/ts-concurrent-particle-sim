@@ -25,10 +25,22 @@ export const SimulationData = new Float32Array(rawSharedViewSimData);
 // render data - multithreading render as well
 
 // gravitational sources, x,y,z,dx,dy,dz,mass
+export let source_count : number = 0;
 export const GRAVITY_FIELDS : number = 7; 
 export const MAX_GFIELDS : number = 10
 export const rawGravityBuffer : SharedArrayBuffer = new SharedArrayBuffer(4 * GRAVITY_FIELDS * MAX_GFIELDS)
 export const GravityBuffer : Float32Array = new Float32Array(rawGravityBuffer);
+
+export function InitGravitySource(x: number, y: number, dx: number, dy: number, m: number) {
+    if (source_count < MAX_GFIELDS) {
+        GravityBuffer[source_count*GRAVITY_FIELDS] = x;
+        GravityBuffer[source_count*GRAVITY_FIELDS+1] = y;
+        GravityBuffer[source_count*GRAVITY_FIELDS+3] = dx;
+        GravityBuffer[source_count*GRAVITY_FIELDS+4] = dy; 
+        GravityBuffer[source_count*GRAVITY_FIELDS+6] = m;
+        source_count++;
+    }
+}
 
 // misc info
 export const rawSharedViewSignals : SharedArrayBuffer = new SharedArrayBuffer(CPU_CORES);
