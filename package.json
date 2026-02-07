@@ -11,10 +11,11 @@
   "type": "module",
   "homepage": "https://vjikholg.github.io/ts-concurrent-particle-sim",
   "scripts": {
-    "predeploy": "npm run build",
+    "predeploy": "npm run build:gh",
     "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "vite build",
+    "build:gh": "vite build --base=/ts-concurrent-particle-sim/",
     "preview": "vite preview"
   },
   "devDependencies": {

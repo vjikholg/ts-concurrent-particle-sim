@@ -6,8 +6,8 @@ const crossOriginIsolationHeaders = {
 };
 
 export default defineConfig({
-  // For project pages: https://<user>.github.io/<repo>/
-  base: "/ts-concurrent-particle-sim/",
+  // Cloudflare Pages serves this app at the site root by default.
+  base: "/",
   server: {
     headers: crossOriginIsolationHeaders,
   },
