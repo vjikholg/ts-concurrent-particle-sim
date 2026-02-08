@@ -49,8 +49,8 @@ export function InitializeWorkers(pool : Worker[]) : void {
 }
 
 export function InitializeTestGravity() : void {
-    InitGravitySource(WIDTH/2 - 200, HEIGHT/2, Math.random()*5, 10,   40000);
-    InitGravitySource(WIDTH/2 + 200, HEIGHT/2,-(Math.random()*5),-10,   10000);
+    InitGravitySource(WIDTH/2 - 200, HEIGHT/2, 100, 10,   40000);
+    // InitGravitySource(WIDTH/2 + 200, HEIGHT/2,-(Math.random()*5),-10,   10000);
     // InitGravitySource(WIDTH/2, HEIGHT/2 + 400, -(Math.random()*5),-10,   40000)
     console.log("grav view data init'd")
 }

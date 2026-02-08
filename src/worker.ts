@@ -128,11 +128,16 @@ const simulate = (ActivePixelBuffer : Uint32Array) : void => {
         }
         
         if ((x < 0 || x >= width) || (y < 0 || y >= height)) { 
-            ParticleView[i*fields]! = (Math.random()*width); 
-            ParticleView[i*fields + 1]! = Math.random()*height;
+            if (Math.random() > 0.25) {
+                ParticleView[i*fields]! = (Math.random()*width); 
+                ParticleView[i*fields + 1]! = Math.random()*height;
 
-            ParticleView[i*fields+3]! = (Math.random()*2 - 1) * 100;
-            ParticleView[i*fields+4]! = (Math.random()*2 - 1) * 100;
+                ParticleView[i*fields+3]! = (Math.random()*2 - 1) * 100;
+                ParticleView[i*fields+4]! = (Math.random()*2 - 1) * 100;
+            } else {
+                continue;
+            }
+
         }
         
 

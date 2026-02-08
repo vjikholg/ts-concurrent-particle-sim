@@ -1,6 +1,8 @@
 import { GravitationalAcceleration } from "./physics/AccelerationSources";
 import { RenderField, RenderFieldBuffer } from "./render";
 import { WIDTH, HEIGHT, CPU_CORES, SimulationData, SIGNAL_RUN, WORKER_POOL, SIGNAL_READY, WORKER_COUNT, SIGNAL_DONE, SIGNAL_PAUSE, GravityBuffer, source_count, GRAVITY_FIELDS } from "./structs/global";
+import { edgeForce } from "./physics/edgeForce";
+
 
 export const perfStats = {
     fps: 0, 
@@ -147,8 +149,8 @@ function UpdateGravity(dt: number) : void {
         }
 
         const [edge_x, edge_y] : number[] = edgeForce(x,y); 
-        ax[i]! += edge_x! * dt;
-        ax[i+1]! += edge_y! * dt;
+        ax[i]! += edge_x!;
+        ay[i]! += edge_y!;
     }
 
     for (let i = 0; i < source_count; i++) { 
@@ -161,25 +163,21 @@ function UpdateGravity(dt: number) : void {
     } 
 }
 
-function distance(x1: number, y1: number, x2: number, y2: number) {
-    return Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2-y1)); 
-}
 
-function edgeForce(x: number, y: number, alpha: number = 0.0001, eps : number = 0.01, delta : number = 0.01, k : number = 5) : number[] {
-
-    const d_abs : number = Math.min(x, WIDTH - x, y, HEIGHT-y);
-
-    if (d_abs > 100) return [0,0]
-
-    const dx : number = WIDTH/2 - x;
-    const dy : number = HEIGHT/2 - y;
-    const mag : number = Math.hypot(dx,dy);
-
-    const dx_hat : number = dx/mag; 
-    const dy_hat : number = dy/mag; 
-
-    const g: number = 1/(d_abs + eps)**alpha;
-
-    return [k*dx_hat*g, k*dy_hat*g]
-
-}
+// function edgeForce(x: number, y: number, alpha: number = 2, eps : number = 0.01, k : number = 5) : number[] {
+// 
+//     const d_abs : number = Math.min(x, WIDTH - x, y, HEIGHT-y);
+// 
+//     if (d_abs > 100) return [0,0]
+// 
+//     const dx : number = WIDTH/2 - x;
+//     const dy : number = HEIGHT/2 - y;
+//     const mag : number = Math.hypot(dx,dy);
+//     const dx_hat : number = dx/mag; 
+//     const dy_hat : number = dy/mag; 
+// 
+//     const g: number = 1/(d_abs + eps)**alpha;
+//     console.log([k*dx_hat*g, k*dy_hat*g], dx,dy,mag,dx_hat,dy_hat,g);
+//     return [k*dx_hat*g, k*dy_hat*g]
+// 
+// }
