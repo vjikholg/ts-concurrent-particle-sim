@@ -1,4 +1,4 @@
-![preview-png](previews/preview.png)
+[![preview-png](previews/preview.png)](https://ts-concurrent-particle-sim.pages.dev/)
 
 A Web Worker–multithreaded particle simulation that targets 60 FPS simulating 1,000,000 particles and their movements in the browser (using gravity!) without relying on WebAssembly or GPU APIs. This project is a proof-of-concept for CPU-side concurrency and rendering performance using `SharedArrayBuffer` and double-buffered pixel data. On my desktop, the simulation runs around 100 FPS. 
 
@@ -8,7 +8,7 @@ A Web Worker–multithreaded particle simulation that targets 60 FPS simulating 
 - **Double-buffered rendering** to solve flickering due to multithreaded-rendering.
 - **Perf telemetry UI** (FPS, frame time, render time) via `lil-gui`.
 - **Cross-origin isolation support** via the `coi-serviceworker.js` helper and Vite plugin.
-- **User Interactivity via Gravitational Acceleration** as in the users can click anywhere in the sim to insert a gravitational sink. Easily customizable to visualize vector fields (i.e., B-Fields, Electric Fields,...).
+- **User Interactivity via Gravitational Acceleration**. Users can click anywhere in the sim to insert a gravitational sink. Easily customizable to visualize vector fields (i.e., B-Fields, Electric Fields,...).
 
 ## Architecture overview
 1. **Main thread controller (`src/sim.ts`)**
